@@ -1,0 +1,13 @@
+# 비밀번호가 들어 있는 파일은 GitHub에 올리지 않음
+.env
+
+# 빌드 결과물
+backend/build/
+backend/.gradle/
+backend/out/
+
+# IDE 설정
+.idea/
+*.iml
+.vscode/
+.DS_Store

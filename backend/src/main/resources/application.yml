@@ -1,0 +1,24 @@
+server:
+  port: 8080
+
+spring:
+  datasource:
+    # ${환경변수:기본값} 형태 → Docker에서는 환경변수 값, 로컬 IntelliJ 실행 시에는 기본값 사용
+    url: ${DB_URL:jdbc:mysql://localhost:3306/campus_program?serverTimezone=Asia/Seoul&characterEncoding=UTF-8&useSSL=false&allowPublicKeyRetrieval=true}
+    username: ${DB_USERNAME:campus}
+    password: ${DB_PASSWORD:campus1234}
+
+  jpa:
+    hibernate:
+      # 엔티티를 보고 테이블을 자동으로 만들거나 수정 (과제용 설정)
+      ddl-auto: update
+    open-in-view: false
+
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+
+logging:
+  level:
+    com.campusprogram: INFO

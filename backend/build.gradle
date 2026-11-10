@@ -1,0 +1,48 @@
+plugins {
+    id 'java'
+    id 'org.springframework.boot' version '3.3.5'
+    id 'io.spring.dependency-management' version '1.1.6'
+}
+
+group = 'com.campusprogram'
+version = '0.0.1'
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(21)
+    }
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    // 웹 API(Controller)
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    // MySQL 저장(JPA)
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    // Redis 연결
+    implementation 'org.springframework.boot:spring-boot-starter-data-redis'
+    // 입력값 검사(@NotBlank, @Pattern 등)
+    implementation 'org.springframework.boot:spring-boot-starter-validation'
+    // MySQL 드라이버
+    runtimeOnly 'com.mysql:mysql-connector-j'
+
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+}
+
+// 실행용 jar 이름을 app.jar로 고정 (Dockerfile에서 사용)
+bootJar {
+    archiveFileName = 'app.jar'
+}
+
+// 실행이 안 되는 plain jar는 만들지 않음
+jar {
+    enabled = false
+}
+
+tasks.named('test') {
+    useJUnitPlatform()
+}

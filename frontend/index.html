@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>비교과 프로그램 신청</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <header class="masthead">
+    <div class="wrap">
+      <h1>비교과 프로그램 신청</h1>
+      <p class="lead">특강, 취업 캠프, 공모전을 선착순으로 신청합니다. 칸 하나가 자리 하나입니다.</p>
+    </div>
+  </header>
+
+  <main class="wrap">
+
+    <!-- 내 정보 입력: 신청·취소할 때 이 값을 사용 -->
+    <section class="me" aria-labelledby="me-title">
+      <h2 id="me-title" class="visually-hidden">내 정보</h2>
+      <form id="me-form" class="me-form" novalidate>
+        <label class="field">
+          <span>학번</span>
+          <input id="student-id" name="studentId" inputmode="numeric" autocomplete="off"
+                 placeholder="2026001" maxlength="10" required>
+        </label>
+        <label class="field">
+          <span>이름</span>
+          <input id="student-name" name="studentName" autocomplete="name"
+                 placeholder="홍길동" maxlength="20" required>
+        </label>
+        <button type="submit" class="btn btn-quiet">내 신청 내역 불러오기</button>
+      </form>
+      <p id="me-status" class="me-status">학번과 이름을 입력하면 신청한 프로그램이 표시됩니다.</p>
+    </section>
+
+    <!-- 종류별 보기 -->
+    <nav class="filters" aria-label="프로그램 종류">
+      <button type="button" class="chip" data-filter="ALL" aria-pressed="true">전체</button>
+      <button type="button" class="chip" data-filter="LECTURE" aria-pressed="false">특강</button>
+      <button type="button" class="chip" data-filter="CAMP" aria-pressed="false">취업 캠프</button>
+      <button type="button" class="chip" data-filter="CONTEST" aria-pressed="false">공모전</button>
+    </nav>
+
+    <!-- 프로그램 목록 (app.js가 채움) -->
+    <ul id="program-list" class="program-list" aria-live="polite"></ul>
+    <p id="empty-message" class="empty" hidden>이 종류로 등록된 프로그램이 없습니다.</p>
+
+    <footer class="page-foot">
+      <span id="last-updated">불러오는 중</span>
+      <button type="button" id="refresh-button" class="btn btn-quiet">새로고침</button>
+    </footer>
+  </main>
+
+  <!-- 결과 안내 메시지 -->
+  <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
+
+  <script src="app.js"></script>
+</body>
+</html>
