@@ -129,7 +129,7 @@ public class RegistrationService {
     @Transactional(readOnly = true)
     public List<MyRegistrationResponse> getMyRegistrations(String studentId) {
         // 1단계: 학번 형식 검사
-        if (studentId == null || !studentId.matches("\\d{6,8}")) {
+        if (studentId == null || !studentId.matches("\\d{6,10}")) {
             throw new ApiException(ErrorCode.INVALID_STUDENT_ID);
         }
 

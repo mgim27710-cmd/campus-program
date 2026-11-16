@@ -9,7 +9,7 @@ import jakarta.validation.constraints.Size;
 public record RegistrationRequest(
 
         @NotBlank(message = "학번을 입력해 주세요.")
-        @Pattern(regexp = "\\d{6,10}", message = "학번은 숫자 7자리로 입력해 주세요.")
+        @Pattern(regexp = "\\d{6,10}", message = "학번은 숫자 6~10자리로 입력해 주세요.")
         String studentId,
 
         @NotBlank(message = "이름을 입력해 주세요.")

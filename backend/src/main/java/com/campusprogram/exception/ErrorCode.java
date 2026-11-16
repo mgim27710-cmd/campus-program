@@ -7,7 +7,7 @@ import org.springframework.http.HttpStatus;
 public enum ErrorCode {
 
     INVALID_INPUT(HttpStatus.BAD_REQUEST, "입력값을 확인해 주세요."),
-    INVALID_STUDENT_ID(HttpStatus.BAD_REQUEST, "학번은 숫자 7자리로 입력해 주세요."),
+    INVALID_STUDENT_ID(HttpStatus.BAD_REQUEST, "학번은 숫자 6~10자리로 입력해 주세요."),
     PROGRAM_NOT_FOUND(HttpStatus.NOT_FOUND, "프로그램을 찾을 수 없습니다."),
     APPLY_NOT_STARTED(HttpStatus.CONFLICT, "아직 신청 기간이 아닙니다. 신청 시작 시각 이후에 다시 시도해 주세요."),
     APPLY_CLOSED(HttpStatus.CONFLICT, "신청 기간이 끝난 프로그램입니다."),
