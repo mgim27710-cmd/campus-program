@@ -111,6 +111,33 @@ body {
   color: var(--muted);
 }
 
+/* ===== 내 신청 내역 목록 ===== */
+.my-registrations {
+  list-style: none;
+  margin: 14px 0 0;
+  padding: 0;
+  border-top: 1px solid var(--line);
+}
+.my-registrations[hidden] { display: none; }
+.my-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--line);
+}
+.my-info {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+.my-title { font-weight: 700; }
+.my-meta {
+  font-size: 13px;
+  color: var(--muted);
+}
+
 /* ===== 버튼 ===== */
 .btn {
   font: inherit;

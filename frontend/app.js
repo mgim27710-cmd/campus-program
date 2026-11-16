@@ -11,6 +11,8 @@
 const state = {
   programs: [],            // 서버에서 받은 프로그램 목록
   myProgramIds: new Set(), // 내가 신청한 프로그램 번호 모음
+  myRegistrations: [],     // 내 신청 내역 목록 (서버에서 받은 값)
+  myLoaded: false,         // 내 신청 내역을 불러온 적이 있으면 true
   filter: "ALL",           // 현재 선택한 종류
   isBusy: false            // 신청·취소 요청 처리 중이면 true (버튼 연타 방지)
 };
@@ -23,6 +25,13 @@ const studentNameInput = document.getElementById("student-name");
 const meStatus = document.getElementById("me-status");
 const lastUpdated = document.getElementById("last-updated");
 const toast = document.getElementById("toast");
+
+// "내 신청 내역" 목록: 안내 문구(me-status) 바로 아래에 만든다
+const myListElement = document.createElement("ul");
+myListElement.id = "my-registrations";
+myListElement.className = "my-registrations";
+myListElement.hidden = true;
+meStatus.after(myListElement);
 
 const AUTO_REFRESH_MS = 10000; // 현황 자동 갱신 간격 (10초)
 const SEAT_GRID_LIMIT = 50;    // 정원이 이보다 크면 칸 대신 막대로 표시
@@ -129,27 +138,36 @@ async function loadPrograms() {
   }
 }
 
-// 내 신청 내역 불러오기 (showResult가 true면 결과를 문장으로 안내)
-async function loadMyRegistrations(showResult) {
+// 내 신청 내역 불러오기: 신청한 프로그램만 목록으로 보여준다
+async function loadMyRegistrations() {
   const studentId = studentIdInput.value.trim();
   if (studentId === "") {
     state.myProgramIds = new Set();
+    state.myRegistrations = [];
+    state.myLoaded = false;
     render();
     return;
   }
 
   try {
     const myList = await callApi("GET", "/api/registrations?studentId=" + encodeURIComponent(studentId));
+    state.myRegistrations = myList;
+    state.myLoaded = true;
     state.myProgramIds = new Set(myList.map(function (item) { return item.programId; }));
-    if (showResult) {
-      meStatus.textContent = myList.length === 0
-        ? "아직 신청한 프로그램이 없습니다."
-        : "신청한 프로그램 " + myList.length + "개를 표시했습니다.";
-    }
+    meStatus.textContent = myList.length === 0
+      ? "아직 신청한 프로그램이 없습니다."
+      : "내 신청 내역 " + myList.length + "건";
     render();
   } catch (error) {
     meStatus.textContent = error.message;
     showToast(error.message, true);
+  }
+}
+
+// 신청·취소 뒤에 내 신청 내역 목록을 새로 고친다
+async function refreshMyRegistrations() {
+  if (state.myLoaded) {
+    await loadMyRegistrations();
   }
 }
 
@@ -175,6 +193,7 @@ async function applyProgram(programId) {
   } finally {
     state.isBusy = false;
     await loadPrograms();
+    await refreshMyRegistrations();
   }
 }
 
@@ -206,6 +225,7 @@ async function cancelProgram(programId) {
   } finally {
     state.isBusy = false;
     await loadPrograms();
+    await refreshMyRegistrations();
   }
 }
 
@@ -290,8 +310,36 @@ function renderProgram(program) {
   );
 }
 
+// 내 신청 내역 목록 (프로그램 이름, 행사 일시, 신청 일시, 취소 버튼)
+function renderMyRegistrations() {
+  if (!state.myLoaded || state.myRegistrations.length === 0) {
+    myListElement.hidden = true;
+    myListElement.innerHTML = "";
+    return;
+  }
+
+  const disabled = state.isBusy ? " disabled" : "";
+  myListElement.innerHTML = state.myRegistrations.map(function (item) {
+    // 행사 일시는 프로그램 목록에서 찾아서 보여준다
+    const program = state.programs.find(function (p) { return p.id === item.programId; });
+    const eventText = program ? "행사 " + formatDateTime(program.eventAt) + " · " : "";
+    return (
+      '<li class="my-item">' +
+        '<div class="my-info">' +
+          '<strong class="my-title">' + escapeHtml(item.programTitle) + "</strong>" +
+          '<span class="my-meta">' + eventText + "신청 " + formatDateTime(item.registeredAt) + "</span>" +
+        "</div>" +
+        '<button type="button" class="btn btn-cancel" data-action="cancel" data-id="' + item.programId + '"' + disabled + ">신청 취소</button>" +
+      "</li>"
+    );
+  }).join("");
+  myListElement.hidden = false;
+}
+
 // 목록 전체 다시 그리기
 function render() {
+  renderMyRegistrations();
+
   const visiblePrograms = state.programs.filter(function (program) {
     return state.filter === "ALL" || program.category === state.filter;
   });
@@ -306,7 +354,7 @@ function render() {
 // ------------------------------------------------------------
 
 // 목록 안의 버튼 클릭 (버튼마다 따로 연결하지 않고 목록 하나에서 처리)
-listElement.addEventListener("click", function (event) {
+function handleActionClick(event) {
   const button = event.target.closest("button[data-action]");
   if (button === null) {
     return;
@@ -317,7 +365,9 @@ listElement.addEventListener("click", function (event) {
   } else if (button.dataset.action === "cancel") {
     cancelProgram(programId);
   }
-});
+}
+listElement.addEventListener("click", handleActionClick);
+myListElement.addEventListener("click", handleActionClick);
 
 // 종류 버튼
 document.querySelectorAll(".chip").forEach(function (chip) {
@@ -334,13 +384,15 @@ document.querySelectorAll(".chip").forEach(function (chip) {
 document.getElementById("me-form").addEventListener("submit", function (event) {
   event.preventDefault();
   if (readStudent() !== null) {
-    loadMyRegistrations(true);
+    loadMyRegistrations();
   }
 });
 
 // 학번을 바꾸면 이전 학번의 "신청 완료" 표시를 지운다
 studentIdInput.addEventListener("input", function () {
   state.myProgramIds = new Set();
+  state.myRegistrations = [];
+  state.myLoaded = false;
   meStatus.textContent = "학번과 이름을 입력하면 신청한 프로그램이 표시됩니다.";
   render();
 });
